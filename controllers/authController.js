@@ -14,16 +14,18 @@ exports.signup = async (req, res, next) => {
             error.statusCode = 400
             throw error
         }
+        const verificationToken = Math.floor(100000000 + Math.random() * 900000000);
         const { email, password, name, role } = req.body
         const hashedPassword = await bcrypt.hash(password, 12)
         const user = new User({
             email,
             password: hashedPassword,
             name,
-            role
+            role,
+            verificationToken
         })
         const newUser = await user.save()
-        //sendMail.sendSignupMail(user.email, user._id)
+        sendMail.sendSignupMail(user.email, user._id, verificationToken)
         res.status(201).json({
             message: 'User created successfully',
             data: newUser
@@ -39,18 +41,29 @@ exports.signup = async (req, res, next) => {
 
 exports.verifyUser = async (req, res, next) => {
     try {
-        const userId = req.params.userId
-        const user = await User.findById(userId)
+        const { userId, token } = req.query
+        if (!userId || !token) {
+            const error = new Error('Invalid request')
+            error.statusCode = 400
+            throw error
+         }
+        const user = await User.findOne({_id:userId, verificationToken:token})
         if (!user) {
             const error = new Error('User not found')
             error.statusCode = 404
             throw error
         }
+        if (user.isActive) {
+          return res.status(200).json({
+            message: 'User already verified',
+            data: []
+        })  
+        }
         user.isActive = true
         const updatedUser = await user.save()
         res.status(200).json({
             message: 'User verified successfully',
-            data: updatedUser
+            data: []
         })
     } catch (error) {
         if (!error.statusCode) {

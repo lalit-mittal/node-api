@@ -31,7 +31,7 @@ router.post('/signup', [
 ], authController.signup)
 
 //verify user
-router.patch('/user/verify/:userId', authController.verifyUser)
+router.get('/user/verify', authController.verifyUser)
 
 //login user
 router.post('/login', authController.login)

@@ -25,6 +25,10 @@ const userSchema = new Schema({
         default: false,
         required: true
     },
+    verificationToken: {
+        type: Number,
+        required: true
+    },
     authToken: {
         type: String
     }
