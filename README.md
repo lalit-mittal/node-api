@@ -1,2 +1,1 @@
-# node-api
-developing rest APIs
+# NODE RESTful APIs
